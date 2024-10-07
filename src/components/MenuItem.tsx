@@ -1,3 +1,4 @@
+import React from "react";
 import classicBurger from "../assets/class-burger.png";
 import { type MenuItemType } from "../App.tsx";
 function AddButton() {
@@ -16,7 +17,8 @@ function MenuItem({
   handleClick: (p: { name: string; id: number }) => void;
 }) {
   const { name, id, description, price } = item;
-  console.log(price);
+  console.log(price, "price");
+
   return (
     <div
       onClick={() => handleClick({ name, id })}
@@ -50,4 +52,4 @@ function MenuItem({
   );
 }
 
-export default MenuItem;
+export default React.memo(MenuItem);

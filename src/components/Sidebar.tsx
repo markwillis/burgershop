@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { type OrderItem } from "../App.tsx";
 
 function Sidebar({
@@ -28,4 +28,4 @@ function Sidebar({
     </div>
   );
 }
-export default Sidebar;
+export default React.memo(Sidebar);

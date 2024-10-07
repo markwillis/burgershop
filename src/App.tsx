@@ -72,13 +72,13 @@ function App() {
   const [newItemInput, setNewItemInput] = React.useState("");
   const [orders, setOrders] = React.useState<Array<OrderItem>>();
 
-  function handleClick({ name, id }: OrderItem) {
+  const handleClick = React.useCallback(({ name, id }: OrderItem) => {
     setOrders((prevOrders) => {
       if (!prevOrders) return;
       return [...prevOrders, { name, id }];
     });
     console.log(name, id);
-  }
+  }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -98,9 +98,11 @@ function App() {
     setNewItemInput("");
   }
 
-  const menuItems = fullMenu.map((item, i) => {
-    return <MenuItem key={i} item={item} handleClick={handleClick} />;
-  });
+  const menuItems = React.useMemo(() => {
+    return fullMenu.map((item, i) => {
+      return <MenuItem key={i} item={item} handleClick={handleClick} />;
+    });
+  }, [fullMenu, handleClick]);
 
   return (
     <div className="App w-full flex flex-row relative">
