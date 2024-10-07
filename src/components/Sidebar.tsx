@@ -1,15 +1,23 @@
-function Sidebar({ children, orders }) {
-  // const currentOrders = Object.entries(accumulatedOrders).map(
-  //   ([key, value]) => {
-  //     return (
-  //       <li key={key} className="flex row">
-  //         <div className="grow select-none">
-  //           {key} ({value.quantity})
-  //         </div>
-  //       </li>
-  //     );
-  //   },
-  // );
+import { ReactNode } from "react";
+import { type OrderItem } from "../App.tsx";
+
+function Sidebar({
+  children,
+  orders,
+}: {
+  children: ReactNode;
+  orders?: OrderItem[];
+}) {
+  // const currentOrders = Object.entries(orders).map(([key, value]) => {
+  //   return (
+  //     <li key={key} className="flex row">
+  //       <div className="grow select-none">
+  //         {key} ({value.quantity})
+  //       </div>
+  //     </li>
+  //   );
+  // });
+  console.log(orders);
 
   return (
     <div className="side-bar-wrapper w-full md:w-1/3 p-8 h-1/4 md:h-full fixed bottom-0 right-0 left-auto">

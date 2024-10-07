@@ -1,13 +1,5 @@
 import classicBurger from "../assets/class-burger.png";
-
-type MenuItem = {
-  name: string;
-  id: string;
-  description: string;
-  price: number;
-  handleClick: (p: { name: string; id: string }) => void;
-};
-
+import { type MenuItemType } from "../App.tsx";
 function AddButton() {
   return (
     <div className="add-button group text-black rounded-full bg-white w-10 h-10 color inline-flex justify-center hover:bg-amber-400 transition-colors duration-1500 ease-in-out cursor-pointer">
@@ -16,7 +8,15 @@ function AddButton() {
   );
 }
 
-function MenuItem({ name, id, description, price, handleClick }: MenuItem) {
+function MenuItem({
+  item,
+  handleClick,
+}: {
+  item: MenuItemType;
+  handleClick: (p: { name: string; id: number }) => void;
+}) {
+  const { name, id, description, price } = item;
+  console.log(price);
   return (
     <div
       onClick={() => handleClick({ name, id })}
@@ -39,7 +39,7 @@ function MenuItem({ name, id, description, price, handleClick }: MenuItem) {
         <div className="price-wrapper absolute -top-4 right-10">
           <div className="w-full h-full bg-yellow-500 absolute top-0 left-0 group-hover:animate-ping rounded-2xl" />
           <p className="bg-white rounded-2xl px-6 py-1.5 relative text-black">
-            ${price.toFixed(2)}
+            ${price.regular.toFixed(2)}
           </p>
         </div>
         <div className="add-button-wrapper absolute bottom-4 right-4">

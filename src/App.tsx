@@ -12,14 +12,14 @@ type BaseMenuItem = {
   featured: boolean;
 };
 
-type MenuItem = BaseMenuItem & {
+export type MenuItemType = BaseMenuItem & {
   categories: CategoryType[];
   price: {
     [size: string]: number;
   };
 };
 
-const menu: MenuItem[] = [
+const menu: MenuItemType[] = [
   {
     id: 1,
     name: "George Burger",
@@ -49,52 +49,57 @@ function MainPage({ children }: { children: ReactNode }) {
   return <div className="w-full md:w-2/3 py-12 px-4">{children}</div>;
 }
 
-function calcMultipleOrders(arr) {
-  return arr.reduce((accOrders, currentOrder) => {
-    if (!accOrders[currentOrder.title]) {
-      return { ...accOrders, [currentOrder.title]: { quantity: 1 } };
-    } else {
-      // increase the quantity by 1
-      accOrders[currentOrder.title].quantity++;
-    }
+// function calcMultipleOrders(arr) {
+//   return arr.reduce((accOrders, currentOrder) => {
+//     if (!accOrders[currentOrder.title]) {
+//       return { ...accOrders, [currentOrder.title]: { quantity: 1 } };
+//     } else {
+//       // increase the quantity by 1
+//       accOrders[currentOrder.title].quantity++;
+//     }
+//
+//     return accOrders;
+//   }, {});
+// }
 
-    return accOrders;
-  }, {});
-}
+export type OrderItem = {
+  name: string;
+  id: number;
+};
 
 function App() {
-  const [fullMenu, setFullMenu] = React.useState<MenuItem[]>(menu);
+  const [fullMenu, setFullMenu] = React.useState<MenuItemType[]>(menu);
   const [newItemInput, setNewItemInput] = React.useState("");
-  const [orders, setOrders] = React.useState([]);
+  const [orders, setOrders] = React.useState<Array<OrderItem>>();
 
-  function handleClick({ title, id }: { title: string; id: string }) {
+  function handleClick({ name, id }: OrderItem) {
     setOrders((prevOrders) => {
-      return [...prevOrders, { title, id }];
+      if (!prevOrders) return;
+      return [...prevOrders, { name, id }];
     });
+    console.log(name, id);
   }
 
-  function handleSubmit(e) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setFullMenu((prevMenu) => {
+    setFullMenu((prevMenu: MenuItemType[]) => {
       return [
         ...prevMenu,
-        { title: newItemInput, description: "none", price: 12 },
+        {
+          name: newItemInput,
+          description: "none",
+          price: { regular: 12 },
+          id: prevMenu.length + 1,
+          featured: false,
+          categories: ["burgers"],
+        },
       ];
     });
     setNewItemInput("");
   }
 
   const menuItems = fullMenu.map((item, i) => {
-    return (
-      <MenuItem
-        key={i}
-        id={`menu-item-${i}`}
-        name={item.name}
-        description={item.description}
-        price={item.price.regular}
-        handleClick={handleClick}
-      />
-    );
+    return <MenuItem key={i} item={item} handleClick={handleClick} />;
   });
 
   return (
