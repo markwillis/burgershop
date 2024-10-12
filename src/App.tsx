@@ -14,9 +14,7 @@ type BaseMenuItem = {
 
 export type MenuItemType = BaseMenuItem & {
   categories: CategoryType[];
-  price: {
-    [size: string]: number;
-  };
+  price: number;
 };
 
 const menu: MenuItemType[] = [
@@ -24,7 +22,7 @@ const menu: MenuItemType[] = [
     id: 1,
     name: "George Burger",
     description: "The George Burger is a 4oz burger with only mayo.",
-    price: { regular: 8 },
+    price: 8,
     featured: false,
     categories: ["burgers"],
   },
@@ -33,9 +31,18 @@ const menu: MenuItemType[] = [
     name: "Dad Burger",
     description:
       "An oversized piece of meat that is sure to give you the sweats just looking at it",
-    price: { regular: 15 },
+    price: 15,
     featured: false,
     categories: ["burgers"],
+  },
+  {
+    id: 3,
+    name: "Pepsi",
+    description:
+      "An oversized piece of meat that is sure to give you the sweats just looking at it",
+    price: 5,
+    featured: false,
+    categories: ["drinks"],
   },
 ];
 
@@ -62,23 +69,38 @@ function MainPage({ children }: { children: ReactNode }) {
 //   }, {});
 // }
 
-export type OrderItem = {
-  name: string;
-  id: number;
+export type OrderItem = MenuItemType & {
+  quantity: number;
 };
 
 function App() {
   const [fullMenu, setFullMenu] = React.useState<MenuItemType[]>(menu);
   const [newItemInput, setNewItemInput] = React.useState("");
-  const [orders, setOrders] = React.useState<Array<OrderItem>>();
+  const [orders, setOrders] = React.useState<OrderItem[]>([]);
 
-  const handleClick = React.useCallback(({ name, id }: OrderItem) => {
-    setOrders((prevOrders) => {
-      if (!prevOrders) return;
-      return [...prevOrders, { name, id }];
-    });
-    console.log(name, id);
-  }, []);
+  const handleClick = React.useCallback(
+    (item: MenuItemType, orderQuantity: number) => {
+      setOrders((prevOrders) => {
+        if (!prevOrders) {
+          return [{ ...item, quantity: orderQuantity }];
+        }
+
+        const itemExists = prevOrders.find((order) => order.id === item.id);
+
+        if (itemExists) {
+          return prevOrders.map((order) => {
+            if (order.id === item.id) {
+              return { ...item, quantity: order.quantity + orderQuantity };
+            }
+            return order;
+          });
+        } else {
+          return [...prevOrders, { ...item, quantity: orderQuantity }];
+        }
+      });
+    },
+    [],
+  );
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,7 +110,7 @@ function App() {
         {
           name: newItemInput,
           description: "none",
-          price: { regular: 12 },
+          price: 12,
           id: prevMenu.length + 1,
           featured: false,
           categories: ["burgers"],
@@ -112,7 +134,7 @@ function App() {
         </div>
       </MainPage>
       <Sidebar orders={orders}>
-        <Heading title="The G&J Burger Co." />
+        <Heading title="Blake Burger Shop" />
         <form onSubmit={handleSubmit}>
           <label htmlFor="item">Item to add</label>
           <input
