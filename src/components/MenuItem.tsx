@@ -13,22 +13,34 @@ function AddButton({
   quantity: number;
   setQuantity: (quantity: number) => void;
 }) {
+  const disabled = quantity === 0;
   return (
-    <div
+    <button
       onClick={() => {
         handleClick(item, quantity);
-        setQuantity(1);
+        setQuantity(0);
       }}
-      className="add-button group text-black rounded bg-white ml-2 p-4 grow h-10 color inline-flex hover:bg-amber-400 transition-colors duration-1500 ease-in-out cursor-pointer"
+      disabled={disabled}
+      className={`add-button group text-black rounded bg-white ml-2 p-4 grow h-10 color inline-flex ${disabled && "opacity-50"} ${!disabled && "hover:bg-amber-400"} transition-colors duration-1500 ease-in-out cursor-pointer`}
     >
       <span className="place-self-center">Add</span>
-    </div>
+    </button>
   );
 }
 
-function QuantitySelector({ quantity, setQuantity, handleClick, item }) {
+function QuantitySelector({
+  quantity,
+  setQuantity,
+  handleClick,
+  item,
+}: {
+  quantity: number;
+  setQuantity: any;
+  handleClick: (item: MenuItemType, quantity: number) => void;
+  item: MenuItemType;
+}) {
   return (
-    <div className="flex ">
+    <div className="flex w-full">
       <div className="relative w-full min-w-0 h-10">
         <input
           type="number"
@@ -39,7 +51,9 @@ function QuantitySelector({ quantity, setQuantity, handleClick, item }) {
         <div className="input-button-wrapper absolute right-1 top-1 flex gap-0.5">
           <button
             className="decrease-button relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-8 max-w-[32px] h-8 max-h-[32px] text-xs bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded"
-            onClick={() => setQuantity((cur) => (cur === 0 ? 0 : cur - 1))}
+            onClick={() =>
+              setQuantity((cur: number) => (cur === 0 ? 0 : cur - 1))
+            }
           >
             <span className="button-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
               <svg
@@ -54,7 +68,7 @@ function QuantitySelector({ quantity, setQuantity, handleClick, item }) {
           </button>
           <button
             className="increase-button relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-8 max-w-[32px] h-8 max-h-[32px] text-xs bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded"
-            onClick={() => setQuantity((cur) => cur + 1)}
+            onClick={() => setQuantity((cur: number) => cur + 1)}
           >
             <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
               <svg
@@ -86,7 +100,7 @@ function MenuItem({
   item: MenuItemType;
   handleClick: (item: MenuItemType, quantity: number) => void;
 }) {
-  const [quantity, setQuantity] = React.useState(1);
+  const [quantity, setQuantity] = React.useState(0);
   const { name, description, price } = item;
 
   return (
@@ -104,10 +118,10 @@ function MenuItem({
       {/*  black inner section */}
       <div className="bg-black relative px-6 py-10 grow flex flex-col items-start justify-items-start text-white rounded-2xl">
         <h4 className="text-2xl font-bold font-serif">{name}</h4>
-        <p className="text-left">{description}</p>
+        <p className="text-left grow mb-8">{description}</p>
         <div className="price-wrapper absolute -top-4 right-10">
-          <div className="w-full h-full bg-yellow-500 absolute top-0 left-0 group-hover:animate-ping rounded-2xl" />
-          <p className="bg-white rounded-2xl px-6 py-1.5 relative text-black">
+          <div className="price-label-indicator w-full h-full bg-yellow-500 absolute top-0 left-0 group-hover:animate-ping rounded-2xl" />
+          <p className="price-label bg-white rounded-2xl px-6 py-1.5 relative text-black">
             ${price.toFixed(2)}
           </p>
         </div>
