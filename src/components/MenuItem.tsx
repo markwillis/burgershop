@@ -26,6 +26,59 @@ function AddButton({
   );
 }
 
+function QuantitySelector({ quantity, setQuantity, handleClick, item }) {
+  return (
+    <div className="flex ">
+      <div className="relative w-full min-w-0 h-10">
+        <input
+          type="number"
+          value={quantity}
+          onChange={(e) => setQuantity(Number(e.target.value))}
+          className="peer w-full h-full bg-white text-black font-sans font-normal outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 disabled:cursor-not-allowed transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 border focus:border-2 border-t-transparent focus:border-t-transparent placeholder:opacity-0 focus:placeholder:opacity-100 text-sm px-3 py-2.5 rounded-[7px] border-blue-gray-200 focus:border-gray-900 appearance-none !border-t-blue-gray-200 placeholder:text-blue-gray-300 placeholder:opacity-100 focus:!border-t-gray-900 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        />
+        <div className="input-button-wrapper absolute right-1 top-1 flex gap-0.5">
+          <button
+            className="decrease-button relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-8 max-w-[32px] h-8 max-h-[32px] text-xs bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded"
+            onClick={() => setQuantity((cur) => (cur === 0 ? 0 : cur - 1))}
+          >
+            <span className="button-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                className="h-4 w-4"
+              >
+                <path d="M3.75 7.25a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5h-8.5Z" />
+              </svg>
+            </span>
+          </button>
+          <button
+            className="increase-button relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-8 max-w-[32px] h-8 max-h-[32px] text-xs bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded"
+            onClick={() => setQuantity((cur) => cur + 1)}
+          >
+            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                className="h-4 w-4"
+              >
+                <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
+              </svg>
+            </span>
+          </button>
+        </div>
+      </div>
+      <AddButton
+        handleClick={handleClick}
+        item={item}
+        quantity={quantity}
+        setQuantity={setQuantity}
+      />
+    </div>
+  );
+}
+
 function MenuItem({
   item,
   handleClick,
@@ -58,54 +111,12 @@ function MenuItem({
             ${price.toFixed(2)}
           </p>
         </div>
-        <div className="flex ">
-          <div className="relative w-full min-w-[200px] h-10 min-w-0">
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              className="peer w-full h-full bg-white text-black font-sans font-normal outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 disabled:cursor-not-allowed transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 border focus:border-2 border-t-transparent focus:border-t-transparent placeholder:opacity-0 focus:placeholder:opacity-100 text-sm px-3 py-2.5 rounded-[7px] border-blue-gray-200 focus:border-gray-900 appearance-none !border-t-blue-gray-200 placeholder:text-blue-gray-300 placeholder:opacity-100 focus:!border-t-gray-900 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            />
-            <div className="input-button-wrapper absolute right-1 top-1 flex gap-0.5">
-              <button
-                className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-8 max-w-[32px] h-8 max-h-[32px] text-xs bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded"
-                onClick={() => setQuantity((cur) => (cur === 0 ? 0 : cur - 1))}
-              >
-                <span className="button-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 16 16"
-                    fill="currentColor"
-                    className="h-4 w-4"
-                  >
-                    <path d="M3.75 7.25a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5h-8.5Z" />
-                  </svg>
-                </span>
-              </button>
-              <button
-                className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-8 max-w-[32px] h-8 max-h-[32px] text-xs bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded"
-                onClick={() => setQuantity((cur) => cur + 1)}
-              >
-                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 16 16"
-                    fill="currentColor"
-                    className="h-4 w-4"
-                  >
-                    <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
-                  </svg>
-                </span>
-              </button>
-            </div>
-          </div>
-          <AddButton
-            handleClick={handleClick}
-            item={item}
-            quantity={quantity}
-            setQuantity={setQuantity}
-          />
-        </div>
+        <QuantitySelector
+          quantity={quantity}
+          setQuantity={setQuantity}
+          handleClick={handleClick}
+          item={item}
+        />
       </div>
     </div>
   );
