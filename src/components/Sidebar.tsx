@@ -9,6 +9,7 @@ function Total({ total }: { total: number }) {
   return (
     <div className="order-total w-full bg-gray-400 p-4 absolute bottom-0 left-0">
       <h2>Total: ${total.toFixed(2)}</h2>
+      "some styles here"
     </div>
   );
 }
