@@ -16,9 +16,11 @@ function Total({ total }: { total: number }) {
 function Sidebar({
   children,
   orders,
+  setOrders,
 }: {
   children: ReactNode;
   orders: OrderItem[];
+  setOrders: (orders: OrderItem[]) => void;
 }) {
   React.useEffect(() => {
     console.log(orders);
