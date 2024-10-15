@@ -133,7 +133,7 @@ function App() {
           {menuItems}
         </div>
       </MainPage>
-      <Sidebar orders={orders}>
+      <Sidebar orders={orders} setOrders={setOrders}>
         <Heading title="Blake Burger Shop" />
         <form onSubmit={handleSubmit}>
           <label htmlFor="item">Item to add</label>
