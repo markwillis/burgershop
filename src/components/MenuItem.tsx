@@ -15,8 +15,8 @@ export default function MenuItem({
       <span className="text-5xl mb-2 group-hover:scale-110 transition-transform">
         {item.emoji}
       </span>
-      <h4 className="font-bold text-lg">{item.name}</h4>
-      <p className="text-gray-500 text-sm text-center mb-2">
+      <h4 className="font-bold text-lg text-gray-900">{item.name}</h4>
+      <p className="text-gray-600 text-sm text-center mb-2">
         {item.description}
       </p>
       <span className="bg-amber-400 text-black font-bold px-4 py-1 rounded-full text-lg">

@@ -53,7 +53,12 @@ export function useOrders(sessionId: string | null) {
   }, [sessionId]);
 
   const placeOrder = useCallback(
-    async (cart: CartItem[], orderNumber: number) => {
+    async (
+      cart: CartItem[],
+      orderNumber: number,
+      amountPaid: number,
+      changeDue: number,
+    ) => {
       if (!sessionId || !supabase) return null;
 
       const items = cart.map((item) => ({
@@ -76,6 +81,8 @@ export function useOrders(sessionId: string | null) {
           items,
           total,
           status: "pending" as OrderStatus,
+          amount_paid: amountPaid,
+          change_due: changeDue,
         })
         .select()
         .single();
@@ -93,27 +100,10 @@ export function useOrders(sessionId: string | null) {
   const updateOrderStatus = useCallback(
     async (orderId: string, status: OrderStatus) => {
       if (!supabase) return;
-
       await supabase.from("orders").update({ status }).eq("id", orderId);
     },
     [],
   );
 
-  const completeOrder = useCallback(
-    async (orderId: string, amountPaid: number, changeDue: number) => {
-      if (!supabase) return;
-
-      await supabase
-        .from("orders")
-        .update({
-          status: "served" as OrderStatus,
-          amount_paid: amountPaid,
-          change_due: changeDue,
-        })
-        .eq("id", orderId);
-    },
-    [],
-  );
-
-  return { orders, placeOrder, updateOrderStatus, completeOrder };
+  return { orders, placeOrder, updateOrderStatus };
 }

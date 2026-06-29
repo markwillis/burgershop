@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { Order } from "../types";
 import Confetti from "./Confetti";
 
 function getPaymentAmount(total: number): number {
@@ -7,25 +6,26 @@ function getPaymentAmount(total: number): number {
   for (const bill of bills) {
     if (bill >= total) return bill;
   }
-  const needed = Math.ceil(total / 50) * 50;
-  return needed;
+  return Math.ceil(total / 50) * 50;
 }
 
 export default function ChangeCalculator({
-  order,
+  total,
   onComplete,
+  onCancel,
 }: {
-  order: Order;
+  total: number;
   onComplete: (amountPaid: number, changeDue: number) => void;
+  onCancel: () => void;
 }) {
   const [input, setInput] = useState("");
   const [showHint, setShowHint] = useState(false);
   const [correct, setCorrect] = useState(false);
 
-  const amountPaid = useMemo(() => getPaymentAmount(order.total), [order.total]);
+  const amountPaid = useMemo(() => getPaymentAmount(total), [total]);
   const correctChange = useMemo(
-    () => Math.round((amountPaid - order.total) * 100) / 100,
-    [amountPaid, order.total],
+    () => Math.round((amountPaid - total) * 100) / 100,
+    [amountPaid, total],
   );
 
   function handleSubmit(e: React.FormEvent) {
@@ -52,19 +52,21 @@ export default function ChangeCalculator({
               Correct!
             </h2>
             <p className="text-xl text-gray-600">
-              ${correctChange.toFixed(2)} change - great job!
+              ${correctChange.toFixed(2)} change - sending to kitchen!
             </p>
           </div>
         ) : (
           <>
             <span className="text-5xl block mb-3">💰</span>
-            <h2 className="text-2xl font-bold mb-4">Time to make change!</h2>
+            <h2 className="text-2xl font-bold mb-4">
+              Take payment first!
+            </h2>
 
             <div className="bg-amber-50 rounded-2xl p-4 mb-4 space-y-2">
               <p className="text-lg">
                 Order total:{" "}
                 <span className="font-bold text-2xl">
-                  ${order.total.toFixed(2)}
+                  ${total.toFixed(2)}
                 </span>
               </p>
               <p className="text-lg">
@@ -97,20 +99,29 @@ export default function ChangeCalculator({
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={!input}
-                className="bg-amber-400 hover:bg-amber-500 disabled:opacity-40 text-black font-bold py-3 px-10 rounded-xl text-xl transition-all hover:scale-105 active:scale-95"
-              >
-                Check!
-              </button>
+              <div className="flex gap-3 justify-center">
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-8 rounded-xl text-lg transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!input}
+                  className="bg-amber-400 hover:bg-amber-500 disabled:opacity-40 text-black font-bold py-3 px-10 rounded-xl text-xl transition-all hover:scale-105 active:scale-95"
+                >
+                  Check!
+                </button>
+              </div>
             </form>
 
             {showHint && (
               <div className="mt-4 bg-red-50 text-red-600 rounded-xl p-3">
                 <p className="font-bold">Not quite! Try again.</p>
                 <p className="text-sm mt-1">
-                  Hint: ${amountPaid.toFixed(2)} − ${order.total.toFixed(2)} = ?
+                  Hint: ${amountPaid.toFixed(2)} − ${total.toFixed(2)} = ?
                 </p>
               </div>
             )}

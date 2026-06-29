@@ -1,10 +1,11 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useOrders } from "../hooks/useOrders";
 import OrderTicket from "../components/OrderTicket";
 import { useEffect, useRef } from "react";
 
 export default function KitchenScreen() {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const navigate = useNavigate();
   const { orders, updateOrderStatus } = useOrders(sessionId || null);
   const prevCountRef = useRef(orders.length);
 
@@ -52,11 +53,19 @@ export default function KitchenScreen() {
             &middot; {readyOrders.length} ready
           </p>
         </div>
-        {pendingOrders.length > 0 && (
-          <div className="bg-yellow-400 text-black px-4 py-2 rounded-xl font-bold text-xl animate-pulse">
-            🔔 {pendingOrders.length} NEW
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {pendingOrders.length > 0 && (
+            <div className="bg-yellow-400 text-black px-4 py-2 rounded-xl font-bold text-xl animate-pulse">
+              🔔 {pendingOrders.length} NEW
+            </div>
+          )}
+          <button
+            onClick={() => navigate(`/kitchen/${sessionId}/menu`)}
+            className="bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-4 rounded-xl transition-all"
+          >
+            📝 Edit Menu
+          </button>
+        </div>
       </header>
 
       <div className="p-4 space-y-6">
@@ -64,7 +73,7 @@ export default function KitchenScreen() {
         {pendingOrders.length > 0 && (
           <section>
             <h2 className="text-xl font-bold mb-3 text-yellow-400">
-              🔔 New Orders
+              🔔 New Orders (Paid)
             </h2>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {pendingOrders.map((order) => (
@@ -106,7 +115,12 @@ export default function KitchenScreen() {
             </h2>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {readyOrders.map((order) => (
-                <OrderTicket key={order.id} order={order} />
+                <OrderTicket
+                  key={order.id}
+                  order={order}
+                  onStatusChange={updateOrderStatus}
+                  showActions
+                />
               ))}
             </div>
           </section>

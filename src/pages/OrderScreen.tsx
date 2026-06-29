@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { menu } from "../data/menu";
 import { useOrders } from "../hooks/useOrders";
+import { useMenu } from "../hooks/useMenu";
 import { CartItem, Category, MenuItemType } from "../types";
 import MenuItem from "../components/MenuItem";
 import CategoryTabs from "../components/CategoryTabs";
@@ -14,18 +14,25 @@ export default function OrderScreen() {
   const [searchParams] = useSearchParams();
   const sessionCode = searchParams.get("code") || "";
 
-  const { orders, placeOrder, completeOrder } = useOrders(sessionId || null);
+  const { orders, placeOrder } = useOrders(sessionId || null);
+  const { menuItems } = useMenu(sessionId || null);
   const [category, setCategory] = useState<Category>("burgers");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orderCount, setOrderCount] = useState(1);
-  const [showCalculator, setShowCalculator] = useState<string | null>(null);
+  const [showCalculator, setShowCalculator] = useState(false);
   const [view, setView] = useState<"menu" | "orders">("menu");
 
-  const filteredMenu = menu.filter((item) => item.category === category);
+  const filteredMenu = menuItems.filter((item) => item.category === category);
 
   const readyOrders = orders.filter((o) => o.status === "ready");
-  const activeOrders = orders.filter(
-    (o) => o.status === "pending" || o.status === "cooking",
+  const cookingOrders = orders.filter((o) => o.status === "cooking");
+  const pendingOrders = orders.filter((o) => o.status === "pending");
+  const servedOrders = orders.filter((o) => o.status === "served");
+  const activeCount = pendingOrders.length + cookingOrders.length;
+
+  const cartTotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
   );
 
   const handleAddToCart = useCallback((item: MenuItemType) => {
@@ -50,23 +57,26 @@ export default function OrderScreen() {
     setCart((prev) => prev.filter((c) => c.id !== id));
   }, []);
 
-  async function handlePlaceOrder() {
+  function handlePayAndOrder() {
     if (cart.length === 0) return;
-    await placeOrder(cart, orderCount);
-    setOrderCount((c) => c + 1);
-    setCart([]);
+    setShowCalculator(true);
   }
 
-  const calculatorOrder = showCalculator
-    ? orders.find((o) => o.id === showCalculator)
-    : null;
+  async function handlePaymentComplete(amountPaid: number, changeDue: number) {
+    await placeOrder(cart, orderCount, amountPaid, changeDue);
+    setOrderCount((c) => c + 1);
+    setCart([]);
+    setShowCalculator(false);
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-100 to-orange-100">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur shadow-sm px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+      <header className="bg-white shadow-md px-4 py-3 flex items-center justify-between sticky top-0 z-30">
         <div>
-          <h1 className="text-2xl font-bold font-serif">🍔 Burger Game</h1>
+          <h1 className="text-2xl font-bold font-serif text-gray-900">
+            🍔 Burger Game
+          </h1>
           <p className="text-sm text-gray-500">Order Screen</p>
         </div>
         <div className="flex items-center gap-3">
@@ -76,8 +86,8 @@ export default function OrderScreen() {
             </span>
           )}
           <div className="bg-amber-100 rounded-xl px-4 py-2 text-center">
-            <p className="text-xs text-gray-500">Kitchen Code</p>
-            <p className="text-2xl font-mono font-bold tracking-widest">
+            <p className="text-xs text-gray-600 font-medium">Kitchen Code</p>
+            <p className="text-2xl font-mono font-bold tracking-widest text-gray-900">
               {sessionCode}
             </p>
           </div>
@@ -90,8 +100,8 @@ export default function OrderScreen() {
           onClick={() => setView("menu")}
           className={`px-5 py-2 rounded-full font-bold transition-all ${
             view === "menu"
-              ? "bg-amber-400 text-black"
-              : "bg-white text-gray-600"
+              ? "bg-amber-400 text-black shadow-md"
+              : "bg-white text-gray-700 shadow-sm"
           }`}
         >
           📋 Menu
@@ -100,14 +110,14 @@ export default function OrderScreen() {
           onClick={() => setView("orders")}
           className={`px-5 py-2 rounded-full font-bold transition-all ${
             view === "orders"
-              ? "bg-amber-400 text-black"
-              : "bg-white text-gray-600"
+              ? "bg-amber-400 text-black shadow-md"
+              : "bg-white text-gray-700 shadow-sm"
           }`}
         >
           📦 Orders{" "}
-          {activeOrders.length > 0 && (
+          {activeCount > 0 && (
             <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full ml-1">
-              {activeOrders.length}
+              {activeCount}
             </span>
           )}
         </button>
@@ -126,59 +136,53 @@ export default function OrderScreen() {
       )}
 
       {view === "orders" && (
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4 pb-8">
           {readyOrders.length > 0 && (
             <div>
-              <h2 className="text-xl font-bold mb-3 text-green-600">
+              <h2 className="text-xl font-bold mb-3 text-green-700">
                 ✅ Ready to Serve
               </h2>
               <div className="space-y-3">
                 {readyOrders.map((order) => (
-                  <div key={order.id}>
-                    <OrderTicket order={order} />
-                    <button
-                      onClick={() => setShowCalculator(order.id)}
-                      className="mt-2 w-full bg-amber-400 hover:bg-amber-500 text-black font-bold py-3 rounded-xl text-lg transition-all hover:scale-105 active:scale-95"
-                    >
-                      💰 Calculate Change & Serve
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeOrders.length > 0 && (
-            <div>
-              <h2 className="text-xl font-bold mb-3">📦 Active Orders</h2>
-              <div className="space-y-3">
-                {activeOrders.map((order) => (
                   <OrderTicket key={order.id} order={order} />
                 ))}
               </div>
             </div>
           )}
 
-          {orders.filter((o) => o.status === "served").length > 0 && (
+          {(pendingOrders.length > 0 || cookingOrders.length > 0) && (
             <div>
-              <h2 className="text-xl font-bold mb-3 text-gray-400">
+              <h2 className="text-xl font-bold mb-3 text-gray-800">
+                📦 In Progress
+              </h2>
+              <div className="space-y-3">
+                {[...cookingOrders, ...pendingOrders].map((order) => (
+                  <OrderTicket key={order.id} order={order} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {servedOrders.length > 0 && (
+            <div>
+              <h2 className="text-xl font-bold mb-3 text-gray-500">
                 🎉 Served
               </h2>
               <div className="space-y-3 opacity-60">
-                {orders
-                  .filter((o) => o.status === "served")
-                  .map((order) => (
-                    <OrderTicket key={order.id} order={order} />
-                  ))}
+                {servedOrders.map((order) => (
+                  <OrderTicket key={order.id} order={order} />
+                ))}
               </div>
             </div>
           )}
 
           {orders.length === 0 && (
-            <div className="text-center text-gray-400 py-12">
+            <div className="text-center text-gray-500 py-12">
               <span className="text-5xl block mb-3">📭</span>
               <p className="text-xl font-bold">No orders yet</p>
-              <p>Switch to the Menu tab to start taking orders!</p>
+              <p className="text-gray-600">
+                Switch to the Menu tab to start taking orders!
+              </p>
             </div>
           )}
         </div>
@@ -188,20 +192,18 @@ export default function OrderScreen() {
       <div className="fixed bottom-0 left-0 right-0 p-4 z-20">
         <Cart
           items={cart}
-          onPlaceOrder={handlePlaceOrder}
+          onPlaceOrder={handlePayAndOrder}
           onUpdateQuantity={handleUpdateQuantity}
           onRemove={handleRemove}
         />
       </div>
 
-      {/* Change Calculator Modal */}
-      {calculatorOrder && (
+      {/* Change Calculator Modal - shown at order time */}
+      {showCalculator && (
         <ChangeCalculator
-          order={calculatorOrder}
-          onComplete={async (amountPaid, changeDue) => {
-            await completeOrder(calculatorOrder.id, amountPaid, changeDue);
-            setShowCalculator(null);
-          }}
+          total={cartTotal}
+          onComplete={handlePaymentComplete}
+          onCancel={() => setShowCalculator(false)}
         />
       )}
     </div>
