@@ -46,7 +46,7 @@ function MenuItemEditor({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40 p-4">
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl"
+        className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl text-gray-900 overflow-hidden"
       >
         <h2 className="text-2xl font-bold mb-4 text-center">
           {item ? "Edit Item" : "Add New Item"}
@@ -57,15 +57,15 @@ function MenuItemEditor({
             <label className="block text-sm font-bold text-gray-700 mb-1">
               Emoji
             </label>
-            <div className="flex flex-wrap gap-2">
-              {EMOJI_OPTIONS.map((e) => (
+            <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+              {EMOJI_OPTIONS.map((e, i) => (
                 <button
-                  key={e}
+                  key={`${e}-${i}`}
                   type="button"
                   onClick={() => setEmoji(e)}
-                  className={`text-2xl p-1 rounded-lg transition-all ${
+                  className={`text-xl w-9 h-9 rounded-lg transition-all shrink-0 ${
                     emoji === e
-                      ? "bg-amber-200 scale-125 shadow-md"
+                      ? "bg-amber-200 scale-110 shadow-md"
                       : "hover:bg-gray-100"
                   }`}
                 >
@@ -84,7 +84,7 @@ function MenuItemEditor({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Super Burger"
-              className="w-full border-2 border-gray-200 rounded-xl p-3 text-lg focus:border-amber-400 focus:outline-none"
+              className="w-full border-2 border-gray-200 rounded-xl p-3 text-lg text-gray-900 focus:border-amber-400 focus:outline-none"
               required
             />
           </div>
@@ -98,7 +98,7 @@ function MenuItemEditor({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="e.g. The best burger in town"
-              className="w-full border-2 border-gray-200 rounded-xl p-3 focus:border-amber-400 focus:outline-none"
+              className="w-full border-2 border-gray-200 rounded-xl p-3 text-gray-900 focus:border-amber-400 focus:outline-none"
             />
           </div>
 
@@ -114,7 +114,7 @@ function MenuItemEditor({
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="5.00"
-                className="w-full border-2 border-gray-200 rounded-xl p-3 text-lg focus:border-amber-400 focus:outline-none"
+                className="w-full border-2 border-gray-200 rounded-xl p-3 text-lg text-gray-900 focus:border-amber-400 focus:outline-none"
                 required
               />
             </div>
@@ -126,7 +126,7 @@ function MenuItemEditor({
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as Category)}
-                className="w-full border-2 border-gray-200 rounded-xl p-3 text-lg focus:border-amber-400 focus:outline-none bg-white"
+                className="w-full border-2 border-gray-200 rounded-xl p-3 text-lg text-gray-900 focus:border-amber-400 focus:outline-none bg-white"
               >
                 {categories.map((cat) => (
                   <option key={cat.key} value={cat.key}>

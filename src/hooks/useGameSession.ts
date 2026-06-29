@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 import { GameSession } from "../types";
 
@@ -8,8 +8,21 @@ function generateCode(): string {
 
 export function useGameSession() {
   const [session, setSession] = useState<GameSession | null>(null);
+  const [sessions, setSessions] = useState<GameSession[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+
+    supabase
+      .from("game_sessions")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setSessions(data as GameSession[]);
+      });
+  }, []);
 
   const createSession = useCallback(async (name: string) => {
     if (!isSupabaseConfigured || !supabase) {
@@ -35,8 +48,10 @@ export function useGameSession() {
       return null;
     }
 
-    setSession(data as GameSession);
-    return data as GameSession;
+    const newSession = data as GameSession;
+    setSession(newSession);
+    setSessions((prev) => [newSession, ...prev]);
+    return newSession;
   }, []);
 
   const joinSession = useCallback(async (code: string) => {
@@ -65,5 +80,12 @@ export function useGameSession() {
     return data as GameSession;
   }, []);
 
-  return { session, loading, error, createSession, joinSession };
+  const deleteSession = useCallback(async (id: string) => {
+    if (!isSupabaseConfigured || !supabase) return;
+
+    await supabase.from("game_sessions").delete().eq("id", id);
+    setSessions((prev) => prev.filter((s) => s.id !== id));
+  }, []);
+
+  return { session, sessions, loading, error, createSession, joinSession, deleteSession };
 }

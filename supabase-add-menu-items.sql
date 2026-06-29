@@ -1,6 +1,7 @@
--- Run this in Supabase SQL Editor to add the menu_items table
+-- Run this in Supabase SQL Editor to add menu_items table and session delete
 -- (Only needed if you already ran the original schema)
 
+-- Menu Items table
 create table if not exists menu_items (
   id serial primary key,
   session_id uuid references game_sessions(id) on delete cascade not null,
@@ -26,4 +27,9 @@ create policy "Anyone can update menu items"
 create policy "Anyone can delete menu items"
   on menu_items for delete to anon using (true);
 
+-- Allow deleting sessions (for cleanup from home screen)
+create policy "Anyone can delete sessions"
+  on game_sessions for delete to anon using (true);
+
+-- Enable Realtime for menu items
 alter publication supabase_realtime add table menu_items;

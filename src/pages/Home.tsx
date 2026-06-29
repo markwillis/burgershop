@@ -63,7 +63,8 @@ function SetupGuide() {
             6
           </span>
           <span>
-            Restart the dev server with <code className="bg-gray-100 px-1 rounded">npm run dev</code>
+            Restart the dev server with{" "}
+            <code className="bg-gray-100 px-1 rounded">npm run dev</code>
           </span>
         </li>
       </ol>
@@ -73,10 +74,12 @@ function SetupGuide() {
 
 export default function Home() {
   const navigate = useNavigate();
-  const { loading, error, createSession, joinSession } = useGameSession();
+  const { sessions, loading, error, createSession, joinSession, deleteSession } =
+    useGameSession();
   const [mode, setMode] = useState<"menu" | "create" | "join">("menu");
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   if (!isSupabaseConfigured) {
     return (
@@ -134,6 +137,68 @@ export default function Home() {
           >
             👨‍🍳 Join Kitchen
           </button>
+
+          {/* Existing Sessions */}
+          {sessions.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-lg font-bold text-gray-800 mb-2 text-center">
+                Previous Restaurants
+              </h3>
+              <div className="space-y-2">
+                {sessions.map((s) => (
+                  <div
+                    key={s.id}
+                    className="bg-white/80 backdrop-blur rounded-xl p-3 flex items-center gap-3"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-900 truncate">
+                        {s.name}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Code: {s.code} &middot;{" "}
+                        {new Date(s.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() =>
+                        navigate(`/order/${s.id}?code=${s.code}`)
+                      }
+                      className="bg-amber-400 hover:bg-amber-500 text-black font-bold py-2 px-3 rounded-lg text-sm transition-all shrink-0"
+                    >
+                      Open
+                    </button>
+                    {confirmDelete === s.id ? (
+                      <div className="flex gap-1 shrink-0">
+                        <button
+                          onClick={async () => {
+                            await deleteSession(s.id);
+                            setConfirmDelete(null);
+                          }}
+                          className="bg-red-500 text-white font-bold py-2 px-3 rounded-lg text-sm"
+                        >
+                          Yes
+                        </button>
+                        <button
+                          onClick={() => setConfirmDelete(null)}
+                          className="bg-gray-300 text-gray-700 font-bold py-2 px-3 rounded-lg text-sm"
+                        >
+                          No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDelete(s.id)}
+                        className="text-red-400 hover:text-red-600 text-lg shrink-0 px-1"
+                        title="Delete"
+                      >
+                        🗑️
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -142,7 +207,7 @@ export default function Home() {
           onSubmit={handleCreate}
           className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-xl"
         >
-          <h2 className="text-2xl font-bold mb-4 text-center">
+          <h2 className="text-2xl font-bold mb-4 text-center text-gray-900">
             🏪 Name Your Restaurant
           </h2>
           <input
@@ -150,7 +215,7 @@ export default function Home() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Blake's Burgers"
-            className="w-full border-2 border-amber-300 rounded-xl p-4 text-lg mb-4 focus:border-amber-500 focus:outline-none"
+            className="w-full border-2 border-amber-300 rounded-xl p-4 text-lg text-gray-900 mb-4 focus:border-amber-500 focus:outline-none"
             autoFocus
           />
           <button
@@ -180,15 +245,17 @@ export default function Home() {
           onSubmit={handleJoin}
           className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-xl"
         >
-          <h2 className="text-2xl font-bold mb-4 text-center">
+          <h2 className="text-2xl font-bold mb-4 text-center text-gray-900">
             👨‍🍳 Enter Kitchen Code
           </h2>
           <input
             type="text"
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
+            onChange={(e) =>
+              setCode(e.target.value.replace(/\D/g, "").slice(0, 4))
+            }
             placeholder="4-digit code"
-            className="w-full border-2 border-amber-300 rounded-xl p-4 text-3xl text-center tracking-[0.5em] mb-4 focus:border-amber-500 focus:outline-none font-mono"
+            className="w-full border-2 border-amber-300 rounded-xl p-4 text-3xl text-center tracking-[0.5em] text-gray-900 mb-4 focus:border-amber-500 focus:outline-none font-mono"
             maxLength={4}
             inputMode="numeric"
             autoFocus

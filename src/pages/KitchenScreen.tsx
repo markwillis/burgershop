@@ -63,7 +63,13 @@ export default function KitchenScreen() {
             onClick={() => navigate(`/kitchen/${sessionId}/menu`)}
             className="bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-4 rounded-xl transition-all"
           >
-            📝 Edit Menu
+            📝 Menu
+          </button>
+          <button
+            onClick={() => navigate("/")}
+            className="bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-4 rounded-xl transition-all"
+          >
+            🚪 Leave
           </button>
         </div>
       </header>
