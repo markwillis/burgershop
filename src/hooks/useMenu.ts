@@ -5,24 +5,35 @@ import { MenuItemType, Category } from "../types";
 import { menu as defaultMenu } from "../data/menu";
 
 export function useMenu(sessionId: string | null) {
-  const [menuItems, setMenuItems] = useState<MenuItemType[]>(defaultMenu);
-  const [menuLoaded, setMenuLoaded] = useState(false);
+  const [menuItems, setMenuItems] = useState<MenuItemType[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
     if (!sessionId || !supabase) return;
 
-    setMenuLoaded(false);
     supabase
       .from("menu_items")
       .select("*")
       .eq("session_id", sessionId)
       .order("id", { ascending: true })
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (!error && data && data.length > 0) {
           setMenuItems(data as MenuItemType[]);
+        } else if (!error && (!data || data.length === 0)) {
+          const seeds = defaultMenu.map((item) => ({
+            session_id: sessionId,
+            name: item.name,
+            description: item.description,
+            emoji: item.emoji,
+            price: item.price,
+            category: item.category,
+          }));
+          const { data: seeded } = await supabase
+            .from("menu_items")
+            .insert(seeds)
+            .select();
+          if (seeded) setMenuItems(seeded as MenuItemType[]);
         }
-        setMenuLoaded(true);
       });
 
     const channel = supabase
@@ -72,29 +83,6 @@ export function useMenu(sessionId: string | null) {
       supabase!.removeChannel(channel);
     };
   }, [sessionId]);
-
-  const seedDefaultMenu = useCallback(
-    async () => {
-      if (!sessionId || !supabase) return;
-
-      const items = defaultMenu.map((item) => ({
-        session_id: sessionId,
-        name: item.name,
-        description: item.description,
-        emoji: item.emoji,
-        price: item.price,
-        category: item.category,
-      }));
-
-      const { data } = await supabase
-        .from("menu_items")
-        .insert(items)
-        .select();
-
-      if (data) setMenuItems(data as MenuItemType[]);
-    },
-    [sessionId],
-  );
 
   const addMenuItem = useCallback(
     async (item: {
@@ -167,10 +155,8 @@ export function useMenu(sessionId: string | null) {
 
   return {
     menuItems,
-    menuLoaded,
     addMenuItem,
     updateMenuItem,
     deleteMenuItem,
-    seedDefaultMenu,
   };
 }

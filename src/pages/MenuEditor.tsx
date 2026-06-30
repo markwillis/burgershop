@@ -170,7 +170,7 @@ function MenuItemEditor({
 export default function MenuEditor() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const { menuItems, menuLoaded, addMenuItem, updateMenuItem, deleteMenuItem, seedDefaultMenu } =
+  const { menuItems, addMenuItem, updateMenuItem, deleteMenuItem } =
     useMenu(sessionId || null);
   const [editing, setEditing] = useState<MenuItemType | null>(null);
   const [adding, setAdding] = useState(false);
@@ -180,10 +180,6 @@ export default function MenuEditor() {
     filterCategory === "all"
       ? menuItems
       : menuItems.filter((item) => item.category === filterCategory);
-
-  const hasDbMenu = menuItems.some(
-    (item) => "session_id" in item,
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 text-white">
@@ -203,21 +199,6 @@ export default function MenuEditor() {
       </header>
 
       <div className="p-4 space-y-4">
-        {menuLoaded && !hasDbMenu && (
-          <div className="bg-amber-500/20 border border-amber-400 rounded-2xl p-4 text-center">
-            <p className="text-amber-200 mb-3">
-              You're using the default menu. Load it into your restaurant so you
-              can customize it!
-            </p>
-            <button
-              onClick={seedDefaultMenu}
-              className="bg-amber-400 hover:bg-amber-500 text-black font-bold py-3 px-6 rounded-xl text-lg transition-all hover:scale-105 active:scale-95"
-            >
-              🍔 Load Default Menu
-            </button>
-          </div>
-        )}
-
         {/* Filter + Add */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           <button
