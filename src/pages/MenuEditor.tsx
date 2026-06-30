@@ -170,7 +170,7 @@ function MenuItemEditor({
 export default function MenuEditor() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const { menuItems, addMenuItem, updateMenuItem, deleteMenuItem, seedDefaultMenu } =
+  const { menuItems, menuLoaded, addMenuItem, updateMenuItem, deleteMenuItem, seedDefaultMenu } =
     useMenu(sessionId || null);
   const [editing, setEditing] = useState<MenuItemType | null>(null);
   const [adding, setAdding] = useState(false);
@@ -203,7 +203,7 @@ export default function MenuEditor() {
       </header>
 
       <div className="p-4 space-y-4">
-        {!hasDbMenu && (
+        {menuLoaded && !hasDbMenu && (
           <div className="bg-amber-500/20 border border-amber-400 rounded-2xl p-4 text-center">
             <p className="text-amber-200 mb-3">
               You're using the default menu. Load it into your restaurant so you

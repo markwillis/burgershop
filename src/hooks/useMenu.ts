@@ -5,10 +5,12 @@ import { menu as defaultMenu } from "../data/menu";
 
 export function useMenu(sessionId: string | null) {
   const [menuItems, setMenuItems] = useState<MenuItemType[]>(defaultMenu);
+  const [menuLoaded, setMenuLoaded] = useState(false);
 
   useEffect(() => {
     if (!sessionId || !supabase) return;
 
+    setMenuLoaded(false);
     supabase
       .from("menu_items")
       .select("*")
@@ -18,6 +20,7 @@ export function useMenu(sessionId: string | null) {
         if (!error && data && data.length > 0) {
           setMenuItems(data as MenuItemType[]);
         }
+        setMenuLoaded(true);
       });
 
     const channel = supabase
@@ -139,6 +142,7 @@ export function useMenu(sessionId: string | null) {
 
   return {
     menuItems,
+    menuLoaded,
     addMenuItem,
     updateMenuItem,
     deleteMenuItem,
