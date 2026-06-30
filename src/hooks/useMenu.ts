@@ -117,14 +117,24 @@ export function useMenu(sessionId: string | null) {
       }>,
     ) => {
       if (!supabase) return;
-      await supabase.from("menu_items").update(updates).eq("id", id);
+      setMenuItems((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...updates } : item)),
+      );
+      const { error } = await supabase.from("menu_items").update(updates).eq("id", id);
+      if (error) {
+        console.error("Failed to update menu item:", error);
+      }
     },
     [],
   );
 
   const deleteMenuItem = useCallback(async (id: number) => {
     if (!supabase) return;
-    await supabase.from("menu_items").delete().eq("id", id);
+    setMenuItems((prev) => prev.filter((item) => item.id !== id));
+    const { error } = await supabase.from("menu_items").delete().eq("id", id);
+    if (error) {
+      console.error("Failed to delete menu item:", error);
+    }
   }, []);
 
   return {

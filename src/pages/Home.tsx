@@ -138,6 +138,12 @@ export default function Home() {
             👨‍🍳 Join Kitchen
           </button>
 
+          {error && (
+            <p className="text-red-600 text-center font-medium bg-white/80 rounded-xl p-2">
+              {error}
+            </p>
+          )}
+
           {/* Existing Sessions */}
           {sessions.length > 0 && (
             <div className="mt-4">

@@ -83,7 +83,12 @@ export function useGameSession() {
   const deleteSession = useCallback(async (id: string) => {
     if (!isSupabaseConfigured || !supabase) return;
 
-    await supabase.from("game_sessions").delete().eq("id", id);
+    const { error: dbError } = await supabase.from("game_sessions").delete().eq("id", id);
+    if (dbError) {
+      console.error("Failed to delete session:", dbError);
+      setError("Could not delete restaurant. Check Supabase delete policy.");
+      return;
+    }
     setSessions((prev) => prev.filter((s) => s.id !== id));
   }, []);
 
