@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../lib/supabase";
+import { RealtimeChannel } from "@supabase/supabase-js";
 import { MenuItemType, Category } from "../types";
 import { menu as defaultMenu } from "../data/menu";
 
 export function useMenu(sessionId: string | null) {
   const [menuItems, setMenuItems] = useState<MenuItemType[]>(defaultMenu);
   const [menuLoaded, setMenuLoaded] = useState(false);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
     if (!sessionId || !supabase) return;
@@ -57,21 +59,16 @@ export function useMenu(sessionId: string | null) {
           );
         },
       )
-      .on(
-        "postgres_changes",
-        {
-          event: "DELETE",
-          schema: "public",
-          table: "menu_items",
-        },
-        (payload) => {
-          const oldId = (payload.old as { id: number }).id;
-          setMenuItems((prev) => prev.filter((item) => item.id !== oldId));
-        },
-      )
+      .on("broadcast", { event: "menu_item_deleted" }, (payload) => {
+        const deletedId = payload.payload.id as number;
+        setMenuItems((prev) => prev.filter((item) => item.id !== deletedId));
+      })
       .subscribe();
 
+    channelRef.current = channel;
+
     return () => {
+      channelRef.current = null;
       supabase!.removeChannel(channel);
     };
   }, [sessionId]);
@@ -159,7 +156,13 @@ export function useMenu(sessionId: string | null) {
     const { error } = await supabase.from("menu_items").delete().eq("id", id);
     if (error) {
       console.error("Failed to delete menu item:", error);
+      return;
     }
+    channelRef.current?.send({
+      type: "broadcast",
+      event: "menu_item_deleted",
+      payload: { id },
+    });
   }, []);
 
   return {
