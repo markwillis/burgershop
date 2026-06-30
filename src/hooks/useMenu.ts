@@ -28,29 +28,45 @@ export function useMenu(sessionId: string | null) {
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "menu_items",
           filter: `session_id=eq.${sessionId}`,
         },
         (payload) => {
-          if (payload.eventType === "INSERT") {
-            setMenuItems((prev) => [...prev, payload.new as MenuItemType]);
-          } else if (payload.eventType === "UPDATE") {
-            setMenuItems((prev) =>
-              prev.map((item) =>
-                item.id === (payload.new as MenuItemType).id
-                  ? (payload.new as MenuItemType)
-                  : item,
-              ),
-            );
-          } else if (payload.eventType === "DELETE") {
-            setMenuItems((prev) =>
-              prev.filter(
-                (item) => item.id !== (payload.old as MenuItemType).id,
-              ),
-            );
-          }
+          const newItem = payload.new as MenuItemType;
+          setMenuItems((prev) =>
+            prev.some((item) => item.id === newItem.id)
+              ? prev
+              : [...prev, newItem],
+          );
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "menu_items",
+          filter: `session_id=eq.${sessionId}`,
+        },
+        (payload) => {
+          const updated = payload.new as MenuItemType;
+          setMenuItems((prev) =>
+            prev.map((item) => (item.id === updated.id ? updated : item)),
+          );
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "menu_items",
+        },
+        (payload) => {
+          const oldId = (payload.old as { id: number }).id;
+          setMenuItems((prev) => prev.filter((item) => item.id !== oldId));
         },
       )
       .subscribe();
@@ -103,7 +119,13 @@ export function useMenu(sessionId: string | null) {
         console.error("Failed to add menu item:", error);
         return null;
       }
-      return data as MenuItemType;
+      const newItem = data as MenuItemType;
+      setMenuItems((prev) =>
+        prev.some((item) => item.id === newItem.id)
+          ? prev
+          : [...prev, newItem],
+      );
+      return newItem;
     },
     [sessionId],
   );
