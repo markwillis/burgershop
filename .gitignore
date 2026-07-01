@@ -26,3 +26,8 @@ dist-ssr
 # TypeScript build info
 tsconfig.app.tsbuildinfo
 tsconfig.node.tsbuildinfo
+
+# Agent skills (installed via `npx skills add`)
+.agents
+.claude
+skills-lock.json
