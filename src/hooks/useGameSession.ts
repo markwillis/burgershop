@@ -67,7 +67,9 @@ export function useGameSession() {
       .from("game_sessions")
       .select()
       .eq("code", code)
-      .single();
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     setLoading(false);
 
