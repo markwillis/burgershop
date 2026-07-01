@@ -8,11 +8,28 @@ import CategoryTabs from "../components/CategoryTabs";
 import Cart from "../components/Cart";
 import OrderTicket from "../components/OrderTicket";
 import ChangeCalculator from "../components/ChangeCalculator";
+import { useGameSession } from "../hooks/useGameSession";
+
+
 
 export default function OrderScreen() {
   const { sessionId } = useParams<{ sessionId: string }>();
+
   const [searchParams] = useSearchParams();
   const sessionCode = searchParams.get("code") || "";
+
+  // get curret session name from useGameSession
+  const {session, sessions} = useGameSession();
+
+  console.log("sessionName", session?.name);
+  console.log("sessions", sessions);
+
+  // memoised session name getter
+  const getSessionName = useCallback((id: string | null) => {
+    if (!id) return "Unknown Session";
+    const foundSession = sessions.find((s) => s.id === id);
+    return foundSession ? foundSession.name : "Unknown Session";
+  }, [sessions]);
 
   const { orders, placeOrder } = useOrders(sessionId || null);
   const { menuItems } = useMenu(sessionId || null);
@@ -75,7 +92,7 @@ export default function OrderScreen() {
       <header className="bg-white shadow-md px-4 py-3 flex items-center justify-between sticky top-0 z-30">
         <div>
           <h1 className="text-2xl font-bold font-serif text-gray-900">
-            🍔 Burger Game
+            Welcome to {getSessionName(sessionId)}
           </h1>
           <p className="text-sm text-gray-500">Order Screen</p>
         </div>

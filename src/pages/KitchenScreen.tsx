@@ -2,9 +2,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useOrders } from "../hooks/useOrders";
 import OrderTicket from "../components/OrderTicket";
 import { useEffect, useRef } from "react";
+import { useGameSession } from "../hooks/useGameSession";
 
 export default function KitchenScreen() {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const { session, sessions } = useGameSession();
   const navigate = useNavigate();
   const { orders, updateOrderStatus } = useOrders(sessionId || null);
   const prevCountRef = useRef(orders.length);
@@ -12,6 +14,11 @@ export default function KitchenScreen() {
   const pendingOrders = orders.filter((o) => o.status === "pending");
   const cookingOrders = orders.filter((o) => o.status === "cooking");
   const readyOrders = orders.filter((o) => o.status === "ready");
+
+  const getSessionName = (sessionId: string | undefined) => {
+    const session = sessions.find((s) => s.id === sessionId);
+    return session ? session.name : "Unknown Session";
+  }
 
   useEffect(() => {
     if (orders.length > prevCountRef.current) {
@@ -47,7 +54,7 @@ export default function KitchenScreen() {
       {/* Header */}
       <header className="bg-black/30 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
         <div>
-          <h1 className="text-2xl font-bold font-serif">👨‍🍳 Kitchen</h1>
+          <h1 className="text-2xl font-bold font-serif">👨‍🍳 {getSessionName(sessionId)} - Kitchen</h1>
           <p className="text-sm text-gray-400">
             {pendingOrders.length} new &middot; {cookingOrders.length} cooking
             &middot; {readyOrders.length} ready
